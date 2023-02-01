@@ -1,10 +1,43 @@
 import Head from "next/head";
 import Image from "next/image";
 import { Inter } from "@next/font/google";
+import { useState } from "react";
+import socket from "@/socket";
+
+function Message({ name, message }) {
+  return (
+    <tr className="flex justify-between w-4/5">
+      <td>
+        <b>{name}</b>
+      </td>
+      <td>{message}</td>
+    </tr>
+  );
+}
 
 const inter = Inter({ subsets: ["latin"] });
 
 export default function Home() {
+  const [formData, setFormData] = useState({
+    name: "",
+    message: "",
+  });
+  const [messages, setMessages] = useState([
+    {
+      name: "SERVER",
+      message: "Welcome to chat",
+    },
+  ]);
+  const onChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+  const sendMessage = () => {
+    socket.emit("message", { from: formData.name, message: formData.message });
+  };
+  socket.on("message", (data) => {
+    setMessages([...messages, { name: data.from, message: data.message }]);
+  });
+
   return (
     <>
       <Head>
@@ -13,7 +46,46 @@ export default function Home() {
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <main></main>
+      <main>
+        <div className="container h-screen m-2 p-2 flex flex-col">
+          <div className="form-control m-2 p-2">
+            <label className="input-group">
+              <span>Name</span>
+              <input
+                type="text"
+                name="text"
+                id="name"
+                placeholder="John Doe"
+                className="input input-bordered"
+                value={formData.name}
+                onChange={(e) => onChange(e)}
+              />
+            </label>
+          </div>
+          <hr />
+          <table className="grow">
+            <tbody className="flex w-screen">
+              {messages.map((msg) => (
+                <Message name={msg.name} message={msg.message} />
+              ))}
+            </tbody>
+          </table>
+          <div className="msgBox flex gap-2">
+            <input
+              type="text"
+              name="message"
+              id="message"
+              placeholder="type here..."
+              className="input input-bordered"
+              value={formData.message}
+              onChange={(e) => onChange(e)}
+            />
+            <button className="btn btn-success" onClick={sendMessage}>
+              Send
+            </button>
+          </div>
+        </div>
+      </main>
     </>
   );
 }
