@@ -5,7 +5,7 @@ const { Server } = require("socket.io");
 const port = process.env.PORT || 5000;
 const io = new Server(server, {
   cors: {
-    origin: "https://chat-app-nine-orpin.vercel.app/",
+    origin: "https://chat-app-nine-orpin.vercel.app",
     methods: ["GET", "POST"],
     credentials: true,
   },
